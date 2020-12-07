@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="wasm_exec.js"></script>
+    <script>
+        const go = new Go()
+        const main = async () => {
+            let wasm = await fetch('main.wasm')
+            let bytes = await wasm.arrayBuffer()
+
+            let result = await WebAssembly.instantiate(
+                bytes,
+                go.importObject
+            )
+
+            go.run(result.instance);
+        }
+
+        main();
+    </script>
+</head>
+
+<body>
+    <h1>asd</h1>
+    <img id="original_image" height="400px" width="400px" alt="not image">
+    <img id="image" height="400px" width="400px" alt="not image">
+    <input id="file" type="file">
+    <script>
+        document.querySelector('#file').addEventListener(
+            'change',
+            function () {
+                var ResultFromWebAssembly;
+                const reader = new FileReader()
+                reader.onload = function () {
+                    // Converting the image to Unit8Array
+                    const arrayBuffer = this.result,
+                        array = new Uint8Array(arrayBuffer)
+                    document.getElementById("original_image").src = 'data:image/jpg;base64, ' + arrayBufferToBase64(arrayBuffer);
+
+                    let a = changeImage(array)
+
+                    document.getElementById("image").src = 'data:image/jpg;base64, ' + arrayBufferToBase64(a);
+
+                    console.log(a)
+                }
+                reader.readAsArrayBuffer(this.files[0])
+            },
+            false
+        )
+
+        function arrayBufferToBase64(buffer) {
+            var binary = '';
+            var bytes = new Uint8Array(buffer);
+            var len = bytes.byteLength;
+            for (var i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+    </script>
+</body>
+
+</html>
